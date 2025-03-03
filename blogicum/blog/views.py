@@ -1,4 +1,4 @@
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from blog.models import Post, Category, Comment
 from datetime import datetime
 from django.contrib.auth import get_user_model
@@ -32,6 +32,10 @@ class OnlyAuthorMixin(UserPassesTestMixin):
         object = self.get_object()
         return object.author == self.request.user
 
+    def handle_no_permission(self):
+        object = self.get_object()
+        return redirect('blog:post_detail', post_id=object.pk)
+
 
 class Index(ListView):
     model = Post
@@ -50,6 +54,22 @@ class PostDetail(DetailView):
     slug_field = 'pk'
     context_object_name = 'post'
     template_name = 'blog/detail.html'
+
+    def get_object(self):
+        post = get_object_or_404(
+            Post.objects.select_related(
+                'author'
+            ),
+            pk=self.kwargs['post_id']
+        )
+
+        if self.request.user.username != post.author.username:
+            return get_object_or_404(
+                query_posts(),
+                pk=self.kwargs['post_id']
+            )
+        else:
+            return get_object_or_404(Post, pk=self.kwargs['post_id'])
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -99,12 +119,12 @@ class ProfileDetail(MultipleObjectMixin, DetailView):
             '-pub_date'
         ).annotate(comment_count=Count('comments')).all()
 
-        # if self.request.user != self.object.username:
-        #     object_list = object_list.filter(
-        #         is_published=True,
-        #         pub_date__lt=datetime.now(),
-        #         category__is_published=True
-        #     )
+        if self.request.user.username != self.object.username:
+            object_list = object_list.filter(
+                is_published=True,
+                pub_date__lt=datetime.now(),
+                category__is_published=True
+            )
 
         context = super().get_context_data(
             object_list=object_list,

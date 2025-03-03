@@ -28,7 +28,7 @@ urlpatterns = [
         views.PasswordChange.as_view(),
         name='password_change'
     ),
-    path('create', views.CreatePost.as_view(), name='create_post'),
+    path('posts/create/', views.CreatePost.as_view(), name='create_post'),
     path(
         'posts/<int:post_id>/edit/',
         views.EditPost.as_view(),
