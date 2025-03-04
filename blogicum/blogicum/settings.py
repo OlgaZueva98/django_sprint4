@@ -36,6 +36,8 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
 ]
 
+# View's constants
+POST_LIMIT = 10
 
 # Application definition
 
