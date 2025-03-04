@@ -147,5 +147,5 @@ dmypy.json
 
 # папки со статикой и медиа
 media/
-.static_dev/css/
+/static_dev/css/
 sent_emails/
