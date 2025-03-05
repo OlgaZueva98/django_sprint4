@@ -6,11 +6,11 @@ from blog.models import Post
 
 
 def query_posts(
-    model=Post.objects,
+    manager=Post.objects,
     is_public: bool = False,
     is_commented: bool = False
 ):
-    queryset = model.select_related(
+    queryset = manager.select_related(
         'category',
         'author',
         'location'

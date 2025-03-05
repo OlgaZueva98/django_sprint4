@@ -17,6 +17,5 @@ urlpatterns = [
     ),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-handler403 = 'pages.views.csrf_failure'
 handler404 = 'pages.views.page_not_found'
 handler500 = 'pages.views.internal_server_error'
