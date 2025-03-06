@@ -52,8 +52,7 @@ class PostDetail(DetailView):
                 query_posts(is_public=True),
                 pk=self.kwargs['post_id']
             )
-        else:
-            return post
+        return post
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -70,20 +69,22 @@ class CategoryPosts(ListView):
     template_name = 'blog/category.html'
     paginate_by = settings.POST_LIMIT
 
-    def get_queryset(self):
-        self.category = get_object_or_404(
+    def get_category(self):
+        return get_object_or_404(
             Category.objects.filter(is_published=True),
             slug=self.kwargs['category_slug']
         )
+
+    def get_queryset(self):
         return query_posts(
-            manager=self.category.posts,
+            manager=self.get_category().posts,
             is_public=True,
             is_commented=True
         )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
-        context['category'] = self.category
+        context['category'] = self.get_category()
 
         return context
 
@@ -95,19 +96,22 @@ class ProfileDetail(ListView):
     paginate_by = settings.POST_LIMIT
     template_name = 'blog/profile.html'
 
+    def get_user(self):
+        return get_object_or_404(User, username=self.kwargs['username'])
+
     def get_queryset(self):
-        self.user = get_object_or_404(User, username=self.kwargs['username'])
-        is_public = self.request.user != self.user
+        user = self.get_user()
+        is_public = self.request.user != user
 
         return query_posts(
-            manager=self.user.posts,
+            manager=user.posts,
             is_public=is_public,
             is_commented=True
         )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
-        context['profile'] = self.user
+        context['profile'] = self.get_user()
 
         return context
 
